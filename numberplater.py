@@ -13,77 +13,58 @@ def double_list_length(list):
     return list
 
 
-# Match 0, 1 or 2 letters at the beginning of a string, followed by 1 or 2 of the following letters: o, d, i, l, r, z, e, b, a, s, g, t, y, c, followed lastly by 0, 1, 2 or 3 letters and then the end of the string:
-
-PATTERN = r"^[a-z]{0,2}[odilrzebasgtyc]{1,2}[a-z]{0,3}$"
-
-# Match 1-3 letters at the beginning of a string, followed bt 1-4 of the following letters: o, d, i, l, r, z, e, b, a, s, g, t, y, c:
-
-PATTERN_DATELESS = r"^[a-z]{1,3}[odilrzebasgtyc]{1,4}$"
-
-PATTERN_FOR_1_LETTER_WORDS = {r"^[odilrzebasgtyc]{1}$": [0]}
-
-PATTERN_FOR_2_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{1}$": [1],
-    r"^[odilrzebasgtyc]{1}[a-z]{1}$": [0],
-    r"^[odilrzebasgtyc]{2}$": [0, 1],
+DATELESS_NUMBER_PLATE_PATTERNS = {
+    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{1}$": [1],
+    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{2}$": [1, 2],
+    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{3}$": [1, 2, 3],
+    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{4}$": [1, 2, 3, 4],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{1}$": [2],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}$": [2, 3],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{3}$": [2, 3, 4],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{1}$": [3],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{2}$": [3, 4],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{3}$": [3, 4, 5],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
+    r"^[odilrzebasgtyc]{1}[a-hj-pr-y]{1,3}$": [0],
+    r"^[odilrzebasgtyc]{2}[a-hj-pr-y]{1,3}$": [0, 1],
+    r"^[odilrzebasgtyc]{3}[a-hj-pr-y]{1,3}$": [0, 1, 2],
+    r"^[odilrzebasgtyc]{4}[a-hj-pr-y]{1,3}$": [0, 1, 2, 3],
 }
 
-PATTERN_FOR_3_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{1}[a-z]{1}$": [1],
-    r"^[a-z]{1}[odilrzebasgtyc]{2}$": [1, 2],
-    r"^[a-z]{2}[odilrzebasgtyc]{1}$": [2],
-    r"^[odilrzebasgtyc]{1}[a-z]{2}$": [0],
-    r"^[odilrzebasgtyc]{2}[a-z]{1}$": [0, 1],
+NORTHERN_IRISH_NUMBER_PLATE_PATTERNS = {
+    r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{1}$": [1],
+    r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{2}$": [1, 2],
+    r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{3}$": [1, 2, 3],
+    r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{4}$": [1, 2, 3, 4],
+    r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{1}$": [2],
+    r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{2}$": [2, 3],
+    r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{3}$": [2, 3, 4],
+    r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
+    r"^[a-pr-z]{3}(?<=[iz].|.[iz])[odilrzebasgtyc]{1}$": [3],
+    r"^[a-pr-z]{3}(?<=[iz].|.[iz])[odilrzebasgtyc]{2}$": [3, 4],
+    r"^[a-pr-z]{3}(?<=[iz].|.[iz])[odilrzebasgtyc]{3}$": [3, 4, 5],
+    r"^[a-pr-z]{3}(?<=[iz].|.[iz])[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
+    r"^[odilrzebasgtyc]{1}(?=.*[iz])[a-pr-z]{1,3}$": [0],
+    r"^[odilrzebasgtyc]{2}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1],
+    r"^[odilrzebasgtyc]{3}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1, 2],
+    r"^[odilrzebasgtyc]{4}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1, 2, 3],
 }
 
-PATTERN_FOR_4_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{1}[a-z]{2}$": [1],
-    r"^[a-z]{1}[odilrzebasgtyc]{2}[a-z]{1}$": [1, 2],
-    r"^[a-z]{1}[odilrzebasgtyc]{3}": [1, 2, 3],
-    r"^[a-z]{2}[odilrzebasgtyc]{1}[a-z]{1}$": [2],
-    r"^[a-z]{2}[odilrzebasgtyc]{2}$": [2, 3],
-    r"^[a-z]{3}[odilrzebasgtyc]{1}$": [3],
-    r"^[odilrzebasgtyc]{1}[a-z]{3}$": [0],
-    r"^[odilrzebasgtyc]{2}[a-z]{2}$": [0, 1],
-    r"^[odilrzebasgtyc]{3}[a-z]{1}$": [0, 1, 2],
+SUFFIX_NUMBER_PLATE_PATTERNS = {
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{1}[a-npr-tv-z]{1}$": [3],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{2}[a-npr-tv-z]{1}$": [3, 4],
+    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{3}[a-npr-tv-z]{1}$": [3, 4, 5],
 }
 
-PATTERN_FOR_5_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{1}[a-z]{3}$": [1],
-    r"^[a-z]{1}[odilrzebasgtyc]{2}[a-z]{2}$": [1, 2],
-    r"^[a-z]{1}[odilrzebasgtyc]{3}[a-z]{1}$": [1, 2, 3],
-    r"^[a-z]{1}[odilrzebasgtyc]{4}$": [1, 2, 3, 4],
-    r"^[a-z]{2}[odilrzebasgtyc]{1}[a-z]{2}$": [2],
-    r"^[a-z]{2}[odilrzebasgtyc]{2}[a-z]{1}$": [2, 3],
-    r"^[a-z]{2}[odilrzebasgtyc]{3}$": [2, 3, 4],
-    r"^[a-z]{3}[odilrzebasgtyc]{1}[a-z]{1}$": [3],
-    r"^[a-z]{3}[odilrzebasgtyc]{2}$": [3, 4],
-    r"^[odilrzebasgtyc]{2}[a-z]{3}$": [0, 1],
-    r"^[odilrzebasgtyc]{3}[a-z]{2}$": [0, 1, 2],
-    r"^[odilrzebasgtyc]{4}[a-z]{1}$": [0, 1, 2, 3],
+PREFIX_NUMBER_PLATE_PATTERNS = {
+    r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{1}[a-hj-pr-y]{3}$": [1],
+    r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{2}[a-hj-pr-y]{3}$": [1, 2],
+    r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{3}[a-hj-pr-y]{3}$": [1, 2, 3],
 }
 
-PATTERN_FOR_6_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{2}[a-z]{3}$": [1, 2],
-    r"^[a-z]{2}[odilrzebasgtyc]{1}[a-z]{3}$": [2],
-    r"^[a-z]{2}[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
-    r"^[a-z]{2}[odilrzebasgtyc]{2}[a-z]{2}$": [2, 3],
-    r"^[a-z]{2}[odilrzebasgtyc]{3}[a-z]{1}$": [2, 3, 4],
-    r"^[a-z]{3}[odilrzebasgtyc]{3}$": [3, 4, 5],
-    r"^[a-z]{3}[odilrzebasgtyc]{2}[a-z]{1}$": [3, 4],
-    r"^[odilrzebasgtyc]{3}[a-z]{3}$": [0, 1, 2],
-    r"^[odilrzebasgtyc]{4}[a-z]{2}$": [0, 1, 2, 3],
-}
-
-PATTERN_FOR_7_LETTER_WORDS = {
-    r"^[a-z]{1}[odilrzebasgtyc]{3}[a-z]{3}$": [1, 2, 3],
-    r"^[a-z]{2}[odilrzebasgtyc]{2}[a-z]{3}$": [2, 3],
-    r"^[a-z]{3}[odilrzebasgtyc]{1}[a-z]{3}$": [3],
-    r"^[a-z]{3}[odilrzebasgtyc]{2}[a-z]{2}$": [3, 4],
-    r"^[a-z]{3}[odilrzebasgtyc]{3}[a-z]{1}$": [3, 4, 5],
-    r"^[a-z]{3}[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
-    r"^[odilrzebasgtyc]{4}[a-z]{3}$": [0, 1, 2, 3],
+CURRENT_NUMBER_PLATE_PATTERNS = {
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-z]{1}$": [2, 3],
 }
 
 
@@ -127,22 +108,19 @@ def main():
     # For each key in words, go through the appropriate dict of patterns and for each pattern that matches the key, use the value of the pattern as a list of indices to replace the letters with the numbers that look like them, and if a letter has multiple numbers that look like it, create all possible strings using each number once and add them to the list of values for the key:
 
     for word in words:
-        if len(word) == 1:
-            appropriate_pattern = PATTERN_FOR_1_LETTER_WORDS
-        elif len(word) == 2:
-            appropriate_pattern = PATTERN_FOR_2_LETTER_WORDS
-        elif len(word) == 3:
-            appropriate_pattern = PATTERN_FOR_3_LETTER_WORDS
-        elif len(word) == 4:
-            appropriate_pattern = PATTERN_FOR_4_LETTER_WORDS
-        elif len(word) == 5:
-            appropriate_pattern = PATTERN_FOR_5_LETTER_WORDS
-        elif len(word) == 6:
-            appropriate_pattern = PATTERN_FOR_6_LETTER_WORDS
-        elif len(word) == 7:
-            appropriate_pattern = PATTERN_FOR_7_LETTER_WORDS
+        patterns = {}
+        if args.dateless or args.all:
+            patterns.update(DATELESS_NUMBER_PLATE_PATTERNS)
+        if args.northern_irish or args.all:
+            patterns.update(NORTHERN_IRISH_NUMBER_PLATE_PATTERNS)
+        if args.suffix or args.all:
+            patterns.update(SUFFIX_NUMBER_PLATE_PATTERNS)
+        if args.prefix or args.all:
+            patterns.update(PREFIX_NUMBER_PLATE_PATTERNS)
+        if args.current or args.all:
+            patterns.update(CURRENT_NUMBER_PLATE_PATTERNS)
 
-        for pattern, indices in appropriate_pattern.items():
+        for pattern, indices in patterns.items():
             if re.match(pattern, word):
                 copy_of_word = word
                 list_of_letters = [letters[copy_of_word[index]] for index in indices]
@@ -198,6 +176,48 @@ if __name__ == "__main__":
         help="The word you want to check if it can be written with numbers that look like letters",
         type=str,
         nargs="?",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--dateless",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on a dateless number plate",
+    )
+
+    parser.add_argument(
+        "-n",
+        "--northern-irish",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on a Northern Irish number plate",
+    )
+
+    parser.add_argument(
+        "-s",
+        "--suffix",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on a suffix number plate",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--prefix",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on a prefix number plate",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--current",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on a current number plate",
+    )
+
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Use this flag if you want to check if the word can be written on any type of number plate",
     )
 
     args = parser.parse_args()
