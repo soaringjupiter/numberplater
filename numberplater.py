@@ -65,7 +65,7 @@ PREFIX_NUMBER_PLATE_PATTERNS = {
 }
 
 CURRENT_NUMBER_PLATE_PATTERNS = {
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-z]{1}$": [2, 3],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-z]{3}$": [2, 3],
 }
 
 
