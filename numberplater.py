@@ -3,6 +3,7 @@ import re
 import os
 import itertools
 import argparse
+import sys
 
 
 # Function that takes a list, doubles its length and the new elements are empty:
@@ -219,6 +220,10 @@ if __name__ == "__main__":
         action="store_true",
         help="Use this flag if you want to check if the word can be written on any type of number plate",
     )
+
+    # if no flags are set, set the default to -a:
+    if len(sys.argv) == 2:
+        parser.set_defaults(all=True)
 
     args = parser.parse_args()
 
