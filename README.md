@@ -19,6 +19,15 @@ Unleash your imagination and let the power of Numberplater transform your chosen
 
 **Please note:** Numberplater does not require any additional installations. It's as simple as running the script with your desired word.
 
+### Example
+```console
+$ python numberplater.py cheetah
+['ch33tah', 'che374h', 'che378h']
+
+$ python numberplater.py --current cheetah
+['ch33tah']
+```
+
 ### Additional Options
 
 Numberplater now offers additional options to cater to different types of UK number plates. Use these flags to check if your word can be written on specific types of number plates:
