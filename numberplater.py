@@ -46,6 +46,7 @@ PATTERN_FOR_4_LETTER_WORDS = {
     r"^[a-z]{3}[odilrzebasgtyc]{1}$": [3],
     r"^[odilrzebasgtyc]{1}[a-z]{3}$": [0],
     r"^[odilrzebasgtyc]{2}[a-z]{2}$": [0, 1],
+    r"^[odilrzebasgtyc]{3}[a-z]{1}$": [0, 1, 2],
 }
 
 PATTERN_FOR_5_LETTER_WORDS = {
@@ -59,6 +60,8 @@ PATTERN_FOR_5_LETTER_WORDS = {
     r"^[a-z]{3}[odilrzebasgtyc]{1}[a-z]{1}$": [3],
     r"^[a-z]{3}[odilrzebasgtyc]{2}$": [3, 4],
     r"^[odilrzebasgtyc]{2}[a-z]{3}$": [0, 1],
+    r"^[odilrzebasgtyc]{3}[a-z]{2}$": [0, 1, 2],
+    r"^[odilrzebasgtyc]{4}[a-z]{1}$": [0, 1, 2, 3],
 }
 
 PATTERN_FOR_6_LETTER_WORDS = {
@@ -68,34 +71,39 @@ PATTERN_FOR_6_LETTER_WORDS = {
     r"^[a-z]{2}[odilrzebasgtyc]{2}[a-z]{2}$": [2, 3],
     r"^[a-z]{2}[odilrzebasgtyc]{3}[a-z]{1}$": [2, 3, 4],
     r"^[a-z]{3}[odilrzebasgtyc]{3}$": [3, 4, 5],
+    r"^[a-z]{3}[odilrzebasgtyc]{2}[a-z]{1}$": [3, 4],
+    r"^[odilrzebasgtyc]{3}[a-z]{3}$": [0, 1, 2],
+    r"^[odilrzebasgtyc]{4}[a-z]{2}$": [0, 1, 2, 3],
 }
 
 PATTERN_FOR_7_LETTER_WORDS = {
+    r"^[a-z]{1}[odilrzebasgtyc]{3}[a-z]{3}$": [1, 2, 3],
     r"^[a-z]{2}[odilrzebasgtyc]{2}[a-z]{3}$": [2, 3],
     r"^[a-z]{3}[odilrzebasgtyc]{1}[a-z]{3}$": [3],
     r"^[a-z]{3}[odilrzebasgtyc]{2}[a-z]{2}$": [3, 4],
     r"^[a-z]{3}[odilrzebasgtyc]{3}[a-z]{1}$": [3, 4, 5],
     r"^[a-z]{3}[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
+    r"^[odilrzebasgtyc]{4}[a-z]{3}$": [0, 1, 2, 3],
 }
 
 
 def main():
     # Dict that has letters as keys and a list of numbers that look like that letter as values:
     letters = {
-        "o": ["0", "6", "8", "9"],
-        "d": ["0"],
-        "i": ["1"],
-        "l": ["1"],
-        "r": ["2"],
-        "z": ["2"],
-        "e": ["3"],
-        "b": ["3", "6", "8"],
-        "a": ["4", "8"],
-        "s": ["5"],
-        "g": ["6", "9"],
-        "t": ["7"],
-        "y": ["7"],
-        "c": ["6"],
+        "o": [("0", 1), ("6", 0.5), ("8", 0.5), ("9", 0.5)],
+        "d": [("0", 0.5)],
+        "i": [("1", 1)],
+        "l": [("1", 1)],
+        "r": [("2", 0.5)],
+        "z": [("2", 1)],
+        "e": [("3", 1)],
+        "b": [("3", 0.5), ("6", 1), ("8", 0.5)],
+        "a": [("4", 1), ("8", 0.5)],
+        "s": [("5", 0.5)],
+        "g": [("6", 0.5), ("9", 0.5)],
+        "t": [("7", 1)],
+        "y": [("7", 0.5)],
+        "c": [("6", 0.5)],
     }
 
     # Set working directory to the folder where the file is located:
@@ -145,7 +153,7 @@ def main():
                         for index in indices:
                             temp_word = (
                                 temp_word[:index]
-                                + combination[i]
+                                + combination[i][0]
                                 + temp_word[index + 1 :]
                             )
                             i += 1
@@ -154,7 +162,7 @@ def main():
                     for letter in list_of_letters[0]:
                         words[word].add(
                             copy_of_word[: indices[0]]
-                            + letter
+                            + letter[0]
                             + copy_of_word[indices[0] + 1 :]
                         )
 
