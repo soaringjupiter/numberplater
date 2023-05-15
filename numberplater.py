@@ -148,6 +148,7 @@ def main():
                 list_of_letters = [letters[copy_of_word[index]] for index in indices]
                 if len(list_of_letters) > 1:
                     for combination in itertools.product(*list_of_letters):
+                        score = 0
                         i = 0
                         temp_word = copy_of_word
                         for index in indices:
@@ -156,15 +157,21 @@ def main():
                                 + combination[i][0]
                                 + temp_word[index + 1 :]
                             )
+                            score += combination[i][1]
                             i += 1
-                        words[word].add(temp_word)
+                        score += sum(2 for char in temp_word if char.isalpha())
+                        words[word].add((temp_word, score))
                 else:
                     for letter in list_of_letters[0]:
-                        words[word].add(
+                        temp_word = (
                             copy_of_word[: indices[0]]
                             + letter[0]
                             + copy_of_word[indices[0] + 1 :]
                         )
+                        score = letter[1] + sum(
+                            2 for char in temp_word if char.isalpha()
+                        )
+                        words[word].add((temp_word, score))
 
     def set_default(obj):
         if isinstance(obj, set):
@@ -176,7 +183,11 @@ def main():
         with open("words.json", "w") as f:
             json.dump(words, f, default=set_default, indent=2)
     else:
-        print(words[args.input_word])
+        tuples = set.union(*words.values())
+        sorted_number_plates_by_score = [
+            tuple[0] for tuple in sorted(tuples, key=lambda x: x[1], reverse=True)
+        ]
+        print(sorted_number_plates_by_score)
 
 
 if __name__ == "__main__":
