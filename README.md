@@ -23,6 +23,9 @@ Unleash your imagination and let the power of Numberplater transform your chosen
 ```console
 $ python numberplater.py cheetah
 ['ch33tah', 'che374h', 'che378h']
+
+$ python numberplater.py --current cheetah
+['ch33tah']
 ```
 
 ### Additional Options
