@@ -3,17 +3,33 @@ import re
 import os
 import itertools
 import argparse
+import string
 import sys
 
 
-# Function that takes a list, doubles its length and the new elements are empty:
-def double_list_length(list):
-    length = len(list)
-    for i in range(length):
-        list.append("")
-    return list
+def handle_wildcards(word):
+    # If there are no wildcards, return the word in a set.
+    if "*" not in word:
+        return {word: set()}
+    else:
+        # If there are more than one wildcard, raise an error.
+        if word.count("*") > 1:
+            raise ValueError(
+                "Currently only one wildcard is supported. Support for multiple wildcards will be added in a future update."
+            )
+        # If there is a wildcard, create a dictionary of all possible words.
+        words = {}
+        # For each letter in the alphabet, replace the wildcard with the letter.
+        for letter in string.ascii_lowercase:
+            new_word = word.replace("*", letter)
+            words[new_word] = set()
+        # Also add the word with the wildcard removed.
+        words[word.replace("*", "")] = set()
+        return words
 
 
+# Regex patterns for number plates:
+# Dateless number plates consist of 1-3 letters followed by 1-4 numbers or 1-4 numbers followed by 1-3 letters.
 DATELESS_NUMBER_PLATE_PATTERNS = {
     r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{1}$": [1],
     r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{2}$": [1, 2],
@@ -33,6 +49,9 @@ DATELESS_NUMBER_PLATE_PATTERNS = {
     r"^[odilrzebasgtyc]{4}[a-hj-pr-y]{1,3}$": [0, 1, 2, 3],
 }
 
+
+# Northern Irish number plates consist of 1-3 letters (containing i or z) followed by 1-4 numbers
+# or 1-4 numbers followed by 1-3 letters (containing i or z).
 NORTHERN_IRISH_NUMBER_PLATE_PATTERNS = {
     r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{1}$": [1],
     r"^[a-pr-z]{1}(?<=[iz].|.[iz])[odilrzebasgtyc]{2}$": [1, 2],
@@ -52,18 +71,21 @@ NORTHERN_IRISH_NUMBER_PLATE_PATTERNS = {
     r"^[odilrzebasgtyc]{4}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1, 2, 3],
 }
 
+# Suffix number plates consist of 3 letters followed by 1-3 numbers and then a single letter.
 SUFFIX_NUMBER_PLATE_PATTERNS = {
     r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{1}[a-npr-tv-z]{1}$": [3],
     r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{2}[a-npr-tv-z]{1}$": [3, 4],
     r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{3}[a-npr-tv-z]{1}$": [3, 4, 5],
 }
 
+# Prefix number plates consist of a single letter followed by 1-3 numbers and then 3 letters.
 PREFIX_NUMBER_PLATE_PATTERNS = {
     r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{1}[a-hj-pr-y]{3}$": [1],
     r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{2}[a-hj-pr-y]{3}$": [1, 2],
     r"^[a-npr-tv-z]{1}[odilrzebasgtyc]{3}[a-hj-pr-y]{3}$": [1, 2, 3],
 }
 
+# Current number plates consist of 2 letters followed by 2 numbers and then 3 letters.
 CURRENT_NUMBER_PLATE_PATTERNS = {
     r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-z]{3}$": [2, 3],
 }
@@ -104,7 +126,7 @@ def main():
             ]
             words = {word: set() for word in words}
     else:
-        words = {args.input_word: set()}
+        words = handle_wildcards(args.input_word)
 
     # For each key in words, go through the appropriate dict of patterns and for each pattern that matches the key, use the value of the pattern as a list of indices to replace the letters with the numbers that look like them, and if a letter has multiple numbers that look like it, create all possible strings using each number once and add them to the list of values for the key:
 
@@ -123,13 +145,12 @@ def main():
 
         for pattern, indices in patterns.items():
             if re.match(pattern, word):
-                copy_of_word = word
-                list_of_letters = [letters[copy_of_word[index]] for index in indices]
+                list_of_letters = [letters[word[index]] for index in indices]
                 if len(list_of_letters) > 1:
                     for combination in itertools.product(*list_of_letters):
                         score = 0
                         i = 0
-                        temp_word = copy_of_word
+                        temp_word = word
                         for index in indices:
                             temp_word = (
                                 temp_word[:index]
@@ -143,9 +164,7 @@ def main():
                 else:
                     for letter in list_of_letters[0]:
                         temp_word = (
-                            copy_of_word[: indices[0]]
-                            + letter[0]
-                            + copy_of_word[indices[0] + 1 :]
+                            word[: indices[0]] + letter[0] + word[indices[0] + 1 :]
                         )
                         score = letter[1] + sum(
                             2 for char in temp_word if char.isalpha()
@@ -153,6 +172,7 @@ def main():
                         words[word].add((temp_word, score))
 
     def set_default(obj):
+        """Converts sets to lists, so they can be serialized."""
         if isinstance(obj, set):
             return list(obj)
         raise TypeError
