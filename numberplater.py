@@ -7,6 +7,12 @@ import string
 import sys
 
 
+def check_input_word(word):
+    if len(word) > 7:
+        raise ValueError("The input word must be 7 characters or less.")
+    return word
+
+
 def handle_wildcards(word):
     # If there are no wildcards, return the word in a set.
     if "*" not in word:
@@ -126,6 +132,7 @@ def main():
             ]
             words = {word: set() for word in words}
     else:
+        check_input_word(args.input_word)
         words = handle_wildcards(args.input_word)
 
     # For each key in words, go through the appropriate dict of patterns and for each pattern that matches the key, use the value of the pattern as a list of indices to replace the letters with the numbers that look like them, and if a letter has multiple numbers that look like it, create all possible strings using each number once and add them to the list of values for the key:
