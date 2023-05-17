@@ -1,3 +1,4 @@
+import datetime
 import json
 import re
 import os
@@ -32,6 +33,21 @@ def handle_wildcards(word):
         # Also add the word with the wildcard removed.
         words[word.replace("*", "")] = set()
         return words
+
+
+def get_issuable_years():
+    # Get the current year:
+    current_year = datetime.datetime.now().year % 100
+    # Get the current month:
+    current_month = datetime.datetime.now().month
+    issued_years = []
+    for x in range(1, current_year + 1):
+        if x != 1:
+            issued_years.append(str(x).zfill(2))
+        if x != current_year or current_month >= 7.0:
+            issued_years.append(str(x + 50).zfill(2))
+    print(issued_years)
+    return issued_years
 
 
 # Regex patterns for number plates:
@@ -99,6 +115,7 @@ CURRENT_NUMBER_PLATE_PATTERNS = {
 
 def main():
     # Dict that has letters as keys and a list of numbers that look like that letter as values:
+    issuable_years = get_issuable_years()
     letters = {
         "o": [("0", 1), ("6", 0.5), ("8", 0.5), ("9", 0.5)],
         "d": [("0", 0.5)],
@@ -166,6 +183,12 @@ def main():
                             )
                             score += combination[i][1]
                             i += 1
+                        if (
+                            pattern in CURRENT_NUMBER_PLATE_PATTERNS
+                            and not args.ignore_year
+                        ):
+                            if int(temp_word[2:4]) not in issuable_years:
+                                continue
                         score += sum(2 for char in temp_word if char.isalpha())
                         words[word].add((temp_word, score))
                 else:
@@ -246,6 +269,12 @@ if __name__ == "__main__":
         "--all",
         action="store_true",
         help="Use this flag if you want to check if the word can be written on any type of number plate",
+    )
+
+    parser.add_argument(
+        "--ignore_year",
+        action="store_true",
+        help="Use this flag if you want to include number plates that cannot currently be issued",
     )
 
     # if no flags are set, set the default to -a:
