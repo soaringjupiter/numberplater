@@ -6,6 +6,14 @@ import argparse
 import sys
 
 
+# Function that takes a string and returns a list of strings with each character doubled:
+def double_characters(s):
+    output = []
+    for i, char in enumerate(s):
+        output.append(s[:i] + char * 2 + s[i + 1 :])
+    return output
+
+
 # Function that takes a list, doubles its length and the new elements are empty:
 def double_list_length(list):
     length = len(list)
