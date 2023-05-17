@@ -46,7 +46,6 @@ def get_issuable_years():
             issued_years.append(str(x).zfill(2))
         if x != current_year or current_month >= 7.0:
             issued_years.append(str(x + 50).zfill(2))
-    print(issued_years)
     return issued_years
 
 
