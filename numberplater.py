@@ -35,7 +35,7 @@ def handle_wildcards(word):
         return words
 
 
-def get_unissuable_years():
+def get_issuable_years():
     # Get the current year:
     current_year = datetime.datetime.now().year % 100
     # Get the current month:
@@ -83,10 +83,10 @@ NORTHERN_IRISH_NUMBER_PLATE_PATTERNS = {
     r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{2}$": [2, 3],
     r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{3}$": [2, 3, 4],
     r"^[a-pr-z]{2}(?<=[iz].|.[iz])[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
-    r"^[a-pr-z]{3}(?<=[iz].|.[iz]|[iz]..)[odilrzebasgtyc]{1}$": [3],
-    r"^[a-pr-z]{3}(?<=[iz].|.[iz]|[iz]..)[odilrzebasgtyc]{2}$": [3, 4],
-    r"^[a-pr-z]{3}(?<=[iz].|.[iz]|[iz]..)[odilrzebasgtyc]{3}$": [3, 4, 5],
-    r"^[a-pr-z]{3}(?<=[iz].|.[iz]|[iz]..)[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
+    r"^[a-pr-z]{3}(?<=[iz]..|.[iz].|[iz]..)[odilrzebasgtyc]{1}$": [3],
+    r"^[a-pr-z]{3}(?<=[iz]..|.[iz].|[iz]..)[odilrzebasgtyc]{2}$": [3, 4],
+    r"^[a-pr-z]{3}(?<=[iz]..|.[iz].|[iz]..)[odilrzebasgtyc]{3}$": [3, 4, 5],
+    r"^[a-pr-z]{3}(?<=[iz]..|.[iz].|[iz]..)[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
     r"^[odilrzebasgtyc]{1}(?=.*[iz])[a-pr-z]{1,3}$": [0],
     r"^[odilrzebasgtyc]{2}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1],
     r"^[odilrzebasgtyc]{3}(?=.*[iz])[a-pr-z]{1,3}$": [0, 1, 2],
@@ -115,7 +115,7 @@ CURRENT_NUMBER_PLATE_PATTERNS = {
 
 def main():
     # Dict that has letters as keys and a list of numbers that look like that letter as values:
-    print(get_unissuable_years())
+    issuable_years = get_issuable_years()
     letters = {
         "o": [("0", 1), ("6", 0.5), ("8", 0.5), ("9", 0.5)],
         "d": [("0", 0.5)],
@@ -183,6 +183,9 @@ def main():
                             )
                             score += combination[i][1]
                             i += 1
+                        if pattern in CURRENT_NUMBER_PLATE_PATTERNS:
+                            if int(temp_word[2:4]) not in issuable_years:
+                                continue
                         score += sum(2 for char in temp_word if char.isalpha())
                         words[word].add((temp_word, score))
                 else:
