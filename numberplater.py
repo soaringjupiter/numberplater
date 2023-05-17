@@ -183,7 +183,10 @@ def main():
                             )
                             score += combination[i][1]
                             i += 1
-                        if pattern in CURRENT_NUMBER_PLATE_PATTERNS:
+                        if (
+                            pattern in CURRENT_NUMBER_PLATE_PATTERNS
+                            and not args.ignore_year
+                        ):
                             if int(temp_word[2:4]) not in issuable_years:
                                 continue
                         score += sum(2 for char in temp_word if char.isalpha())
@@ -269,7 +272,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--ignore-year",
+        "--ignore_year",
         action="store_true",
         help="Use this flag if you want to include number plates that cannot currently be issued",
     )
