@@ -1,16 +1,19 @@
-import datetime
-import json
-import re
-import os
-import itertools
 import argparse
+import itertools
+import json
+import os
+import re
 import string
 import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 def check_input_word(word):
-    if len(word) > 7:
-        raise ValueError("The input word must be 7 characters or less.")
+    max_number_plate_length = 7
+    if len(word) > max_number_plate_length:
+        msg = "The input word must be 7 characters or less."
+        raise ValueError(msg)
     return word
 
 
@@ -18,56 +21,69 @@ def handle_wildcards(word):
     # If there are no wildcards, return the word in a set.
     if "*" not in word:
         return {word: set()}
-    else:
-        # If there are more than one wildcard, raise an error.
-        if word.count("*") > 1:
-            raise ValueError(
-                "Currently only one wildcard is supported. Support for multiple wildcards will be added in a future update."
-            )
-        # If there is a wildcard, create a dictionary of all possible words.
-        words = {}
-        # For each letter in the alphabet, replace the wildcard with the letter.
-        for letter in string.ascii_lowercase:
-            new_word = word.replace("*", letter)
-            words[new_word] = set()
-        # Also add the word with the wildcard removed.
-        words[word.replace("*", "")] = set()
-        return words
+    # If there are more than one wildcard, raise an error.
+    if word.count("*") > 1:
+        msg = "Currently only one wildcard is supported. Support for multiple wildcards will be added in a future update."
+        raise ValueError(msg)
+    # If there is a wildcard, create a dictionary of all possible words.
+    words = {}
+    # For each letter in the alphabet, replace the wildcard with the letter.
+    for letter in string.ascii_lowercase:
+        new_word = word.replace("*", letter)
+        words[new_word] = set()
+    # Also add the word with the wildcard removed.
+    words[word.replace("*", "")] = set()
+    return words
 
 
 def get_issuable_years():
-    # Get the current year:
-    current_year = datetime.datetime.now().year % 100
-    # Get the current month:
-    current_month = datetime.datetime.now().month
-    issued_years = []
-    for x in range(1, current_year + 1):
-        if x != 1:
-            issued_years.append(str(x).zfill(2))
-        if x != current_year or current_month >= 7.0:
-            issued_years.append(str(x + 50).zfill(2))
-    return issued_years
+    now = datetime.now(ZoneInfo("Europe/London"))
+    yy = now.year % 100  # two-digit year
+    m = now.month
+
+    codes = []
+
+    # 2001 (sep only)
+    year_2001 = 1
+    september = 9
+    if yy > year_2001 or (yy == year_2001 and m >= september):
+        codes.append("51")
+
+    # full past years (2002 .. current_year-1): both march (yy) and sept (yy+50)
+    for y in range(2, max(2, yy)):  # empty if current year is 2002
+        codes.extend([f"{y:02d}", f"{y + 50:02d}"])
+
+    # current year:
+    year_2002 = 2
+    if yy >= year_2002:
+        march = 3
+        if m >= march:
+            codes.append(f"{yy:02d}")  # march code
+        if m >= september:
+            codes.append(f"{yy + 50:02d}")  # september code
+
+    return codes
 
 
 # Regex patterns for number plates:
 # Dateless number plates consist of 1-3 letters followed by 1-4 numbers or 1-4 numbers followed by 1-3 letters.
 DATELESS_NUMBER_PLATE_PATTERNS = {
-    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{1}$": [1],
-    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{2}$": [1, 2],
-    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{3}$": [1, 2, 3],
-    r"^[a-hj-pr-y]{1}[odilrzebasgtyc]{4}$": [1, 2, 3, 4],
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{1}$": [2],
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}$": [2, 3],
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{3}$": [2, 3, 4],
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
-    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{1}$": [3],
-    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{2}$": [3, 4],
-    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{3}$": [3, 4, 5],
-    r"^[a-hj-pr-y]{3}[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
-    r"^[odilrzebasgtyc]{1}[a-hj-pr-y]{1,3}$": [0],
-    r"^[odilrzebasgtyc]{2}[a-hj-pr-y]{1,3}$": [0, 1],
-    r"^[odilrzebasgtyc]{3}[a-hj-pr-y]{1,3}$": [0, 1, 2],
-    r"^[odilrzebasgtyc]{4}[a-hj-pr-y]{1,3}$": [0, 1, 2, 3],
+    r"^[a-hj-pr-yo]{1}[odilrzebasgtyc]{1}$": [1],
+    r"^[a-hj-pr-yo]{1}[odilrzebasgtyc]{2}$": [1, 2],
+    r"^[a-hj-pr-yo]{1}[odilrzebasgtyc]{3}$": [1, 2, 3],
+    r"^[a-hj-pr-yo]{1}[odilrzebasgtyc]{4}$": [1, 2, 3, 4],
+    r"^[a-hj-pr-yo]{2}[odilrzebasgtyc]{1}$": [2],
+    r"^[a-hj-pr-yo]{2}[odilrzebasgtyc]{2}$": [2, 3],
+    r"^[a-hj-pr-yo]{2}[odilrzebasgtyc]{3}$": [2, 3, 4],
+    r"^[a-hj-pr-yo]{2}[odilrzebasgtyc]{4}$": [2, 3, 4, 5],
+    r"^[a-hj-pr-yo]{3}[odilrzebasgtyc]{1}$": [3],
+    r"^[a-hj-pr-yo]{3}[odilrzebasgtyc]{2}$": [3, 4],
+    r"^[a-hj-pr-yo]{3}[odilrzebasgtyc]{3}$": [3, 4, 5],
+    r"^[a-hj-pr-yo]{3}[odilrzebasgtyc]{4}$": [3, 4, 5, 6],
+    r"^[odilrzebasgtyc]{1}[a-hj-pr-yo]{1,3}$": [0],
+    r"^[odilrzebasgtyc]{2}[a-hj-pr-yo]{1,3}$": [0, 1],
+    r"^[odilrzebasgtyc]{3}[a-hj-pr-yo]{1,3}$": [0, 1, 2],
+    r"^[odilrzebasgtyc]{4}[a-hj-pr-yo]{1,3}$": [0, 1, 2, 3],
 }
 
 
@@ -108,7 +124,7 @@ PREFIX_NUMBER_PLATE_PATTERNS = {
 
 # Current number plates consist of 2 letters followed by 2 numbers and then 3 letters.
 CURRENT_NUMBER_PLATE_PATTERNS = {
-    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-z]{3}$": [2, 3],
+    r"^[a-hj-pr-y]{2}[odilrzebasgtyc]{2}[a-hj-pr-yz]{3}$": [2, 3],
 }
 
 
@@ -170,9 +186,10 @@ def main():
             if re.match(pattern, word):
                 list_of_letters = [letters[word[index]] for index in indices]
                 if len(list_of_letters) > 1:
-                    for combination in itertools.product(*list_of_letters):
+                    for i, combination in enumerate(
+                        itertools.product(*list_of_letters),
+                    ):
                         score = 0
-                        i = 0
                         temp_word = word
                         for index in indices:
                             temp_word = (
@@ -181,13 +198,11 @@ def main():
                                 + temp_word[index + 1 :]
                             )
                             score += combination[i][1]
-                            i += 1
                         if (
                             pattern in CURRENT_NUMBER_PLATE_PATTERNS
                             and not args.ignore_year
-                        ):
-                            if int(temp_word[2:4]) not in issuable_years:
-                                continue
+                        ) and temp_word[2:4] not in issuable_years:
+                            continue
                         score += sum(2 for char in temp_word if char.isalpha())
                         words[word].add((temp_word, score))
                 else:
